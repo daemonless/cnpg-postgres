@@ -1,0 +1,25 @@
+icon: ':simple-postgresql:'
+
+cit:
+  mode: port
+  port: 5432
+
+build:
+  variants:
+    - tag: "17"
+      pkg_name: postgresql17-server
+      containerfile: Containerfile.pkg
+      args:
+        PG_VERSION: "17"
+        PGAUDIT_VERSION: "17.1"
+        PG_FAILOVER_SLOTS_VERSION: "1.2.0"
+      aliases: ["17-standard"]
+    - tag: "18"
+      pkg_name: postgresql18-server
+      containerfile: Containerfile.pkg
+      args:
+        PG_VERSION: "18"
+        PGAUDIT_VERSION: "18.0"
+        PG_FAILOVER_SLOTS_VERSION: "1.2.0"
+      aliases: ["18-standard", "standard", "latest"]
+      default: true
