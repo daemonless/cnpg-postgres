@@ -1,11 +1,11 @@
 {
-  "generated": "2026-08-25T07:09:44Z",
+  "generated": "2026-09-08T12:37:47Z",
   "image": "cnpg-postgres",
   "tags": {
     "17": {
       "app_version": "17.11",
       "arch": "amd64",
-      "generated": "2026-08-25T07:08:07Z",
+      "generated": "2026-09-08T12:35:14Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -154,7 +154,7 @@
               "BSD2CLAUSE"
             ],
             "name": "FreeBSD-openssl-lib",
-            "version": "15.1"
+            "version": "15.1p3"
           },
           {
             "licenses": [
@@ -182,7 +182,7 @@
               "BSD2CLAUSE"
             ],
             "name": "FreeBSD-runtime",
-            "version": "15.1p2"
+            "version": "15.1p3"
           },
           {
             "licenses": [
@@ -245,7 +245,7 @@
               "MPL20"
             ],
             "name": "ca_root_nss",
-            "version": "3.126.1"
+            "version": "3.127"
           },
           {
             "licenses": [
@@ -463,7 +463,7 @@
     "18": {
       "app_version": "18.6",
       "arch": "amd64",
-      "generated": "2026-08-25T07:08:42Z",
+      "generated": "2026-09-08T12:36:53Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -612,7 +612,7 @@
               "BSD2CLAUSE"
             ],
             "name": "FreeBSD-openssl-lib",
-            "version": "15.1"
+            "version": "15.1p3"
           },
           {
             "licenses": [
@@ -640,7 +640,7 @@
               "BSD2CLAUSE"
             ],
             "name": "FreeBSD-runtime",
-            "version": "15.1p2"
+            "version": "15.1p3"
           },
           {
             "licenses": [
@@ -703,7 +703,7 @@
               "MPL20"
             ],
             "name": "ca_root_nss",
-            "version": "3.126.1"
+            "version": "3.127"
           },
           {
             "licenses": [
