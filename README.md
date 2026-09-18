@@ -7,6 +7,7 @@ Source: dbuild templates
 
 [![Build Status](https://img.shields.io/github/actions/workflow/status/daemonless/cnpg-postgres/build.yaml?style=flat-square&label=Build&color=green)](https://github.com/daemonless/cnpg-postgres/actions)
 [![Last Commit](https://img.shields.io/github/last-commit/daemonless/cnpg-postgres?style=flat-square&label=Last+Commit&color=blue)](https://github.com/daemonless/cnpg-postgres/commits)
+[![OCI Pulls](https://img.shields.io/docker/pulls/daemonless/cnpg-postgres?style=flat-square&label=OCI+Pulls&color=blue)](https://hub.docker.com/r/daemonless/cnpg-postgres)
 [![sysvipc Required](https://img.shields.io/badge/sysvipc-required-orange?style=flat-square&logo=freebsd&logoColor=white)](https://daemonless.io/guides/ocijail-patch/)
 
 PostgreSQL on FreeBSD, compatible with the CloudNativePG Kubernetes operator. Includes pgvector, pgaudit, and pg_failover_slots.
@@ -69,8 +70,9 @@ services:
   cnpg-postgres:
     name: cnpg_postgres
     options:
-      - container: 'boot args:--pull'
+      - container: 'args:--pull'
       - expose: '5432:5432 proto:tcp'
+      - template: !ENV '${PWD}/template.conf'
     volumes:
       - cnpg-postgres: /var/lib/postgresql/data
 volumes:
@@ -85,14 +87,30 @@ volumes:
 
 ARG tag=latest
 
+OPTION container=boot
 OPTION overwrite=force
 OPTION from=ghcr.io/daemonless/cnpg-postgres:${tag}
-SET allow.sysvipc=1
+```
+
+**template.conf**:
+
+```
+# template.conf
+
+exec.start: "/bin/sh /etc/rc"
+exec.stop: "/bin/sh /etc/rc.shutdown jail"
+mount.devfs
+persist
+allow.sysvipc
 ```
 
 Save the files above, then run `appjail-director up`.
 
-**Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
+
+> [!WARNING]
+> Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the jail's IPv4 address or hostname assigned by the virtual network.
+>
+> To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
 
 ### Podman CLI
 
@@ -108,39 +126,59 @@ Save as `run.sh`, then run `sh run.sh`.
 
 ### AppJail
 
+
 ```bash
 appjail oci run -Pd \
   -o overwrite=force \
   -o container="args:--pull" \
   -o virtualnet=":<random> default" \
   -o nat \
+  -o template=template.conf \
   -o expose="5432:5432 proto:tcp" \
   -o fstab="/path/to/containers/cnpg-postgres /var/lib/postgresql/data <pseudofs>" \
   ghcr.io/daemonless/cnpg-postgres:latest cnpg-postgres
 ```
 
-Save as `run.sh`, then run `sh run.sh`.
+**template.conf**:
+```
+# template.conf
 
-**Note**: Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the IPv4 address assigned by the virtual network.
+exec.start: "/bin/sh /etc/rc"
+exec.stop: "/bin/sh /etc/rc.shutdown jail"
+mount.devfs
+persist
+allow.sysvipc
+```
+
+Save the files above, then run `sh run.sh`.
+
+
+> [!WARNING]
+> Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the jail's IPv4 address or hostname assigned by the virtual network.
+>
+> To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
 
 ### Bastille
 
 > [!WARNING]
-> Bastille's OCI support is **experimental**. It requires `buildah`, shares the host network stack (`inherit`), and persists image-declared volumes under `--data-path`.
+> Bastille's OCI support is **experimental**. It requires `buildah` and shares the host network stack (`inherit`). Mount volumes with `--volume HOST JAIL`; without it, image-declared volumes are stored under `${bastille_volumesdir}/${jail}`.
 
 ```yaml
 services:
   cnpg-postgres:
+    name: cnpg-postgres
     image: "ghcr.io/daemonless/cnpg-postgres:latest"
-    container_name: cnpg-postgres
-    network_mode: host  # jail shares host networking
+    network:
+      - mode: host
+    volumes:
+      - "/path/to/containers/cnpg-postgres:/var/lib/postgresql/data"
 ```
 
-Save as `podman-compose.yml`, then run `bastille up`. Or via CLI:
+Save as `bastille-compose.yml`, then run `bastille up`. Or via CLI:
 
 ```bash
 bastille create -O \
-  --data-path /path/to/containers/cnpg-postgres \
+  --volume /path/to/containers/cnpg-postgres /var/lib/postgresql/data \
   cnpg-postgres ghcr.io/daemonless/cnpg-postgres:latest inherit
 ```
 

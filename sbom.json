@@ -1,11 +1,11 @@
 {
-  "generated": "2026-09-08T12:37:47Z",
+  "generated": "2026-09-18T22:14:33Z",
   "image": "cnpg-postgres",
   "tags": {
     "17": {
       "app_version": "17.11",
       "arch": "amd64",
-      "generated": "2026-09-08T12:35:14Z",
+      "generated": "2026-09-18T22:13:39Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
@@ -463,7 +463,7 @@
     "18": {
       "app_version": "18.6",
       "arch": "amd64",
-      "generated": "2026-09-08T12:36:53Z",
+      "generated": "2026-09-18T22:13:33Z",
       "packages": {
         "dotnet": [],
         "freebsd": [
