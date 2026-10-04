@@ -38,7 +38,7 @@ services:
     image: "ghcr.io/daemonless/cnpg-postgres:latest"
     container_name: cnpg-postgres
     volumes:
-      - "/path/to/containers/cnpg-postgres:/var/lib/postgresql/data"
+      - "/containers/cnpg-postgres:/var/lib/postgresql/data"
     ports:
       - "5432:5432"
     annotations:
@@ -77,7 +77,7 @@ services:
       - cnpg-postgres: /var/lib/postgresql/data
 volumes:
   cnpg-postgres:
-    device: '/path/to/containers/cnpg-postgres'
+    device: '/containers/cnpg-postgres'
 ```
 
 **Makejail**:
@@ -112,52 +112,6 @@ Save the files above, then run `appjail-director up`.
 >
 > To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
 
-### Podman CLI
-
-```bash
-podman run -d --name cnpg-postgres \
-  -p 5432:5432 \
-  --annotation 'org.freebsd.jail.allow.sysvipc=true' \
-  -v /path/to/containers/cnpg-postgres:/var/lib/postgresql/data \
-  ghcr.io/daemonless/cnpg-postgres:latest
-```
-
-Save as `run.sh`, then run `sh run.sh`.
-
-### AppJail
-
-
-```bash
-appjail oci run -Pd \
-  -o overwrite=force \
-  -o container="args:--pull" \
-  -o virtualnet=":<random> default" \
-  -o nat \
-  -o template=template.conf \
-  -o expose="5432:5432 proto:tcp" \
-  -o fstab="/path/to/containers/cnpg-postgres /var/lib/postgresql/data <pseudofs>" \
-  ghcr.io/daemonless/cnpg-postgres:latest cnpg-postgres
-```
-
-**template.conf**:
-```
-# template.conf
-
-exec.start: "/bin/sh /etc/rc"
-exec.stop: "/bin/sh /etc/rc.shutdown jail"
-mount.devfs
-persist
-allow.sysvipc
-```
-
-Save the files above, then run `sh run.sh`.
-
-
-> [!WARNING]
-> Exposing ports in AppJail means that your service can be reached from remote hosts. If that is not your intention, do not expose the ports and communicate with the service using the jail's IPv4 address or hostname assigned by the virtual network.
->
-> To avoid exposing ports, just remove the `expose` option in your `appjail-director.yml` or from your command-line arguments.
-
 ### Bastille
 
 > [!WARNING]
@@ -171,35 +125,10 @@ services:
     network:
       - mode: host
     volumes:
-      - "/path/to/containers/cnpg-postgres:/var/lib/postgresql/data"
+      - "/containers/cnpg-postgres:/var/lib/postgresql/data"
 ```
 
-Save as `bastille-compose.yml`, then run `bastille up`. Or via CLI:
-
-```bash
-bastille create -O \
-  --volume /path/to/containers/cnpg-postgres /var/lib/postgresql/data \
-  cnpg-postgres ghcr.io/daemonless/cnpg-postgres:latest inherit
-```
-
-### Ansible
-
-```yaml
-- name: Deploy cnpg-postgres
-  containers.podman.podman_container:
-    name: cnpg-postgres
-    image: "ghcr.io/daemonless/cnpg-postgres:latest"
-    state: started
-    restart_policy: always
-    ports:
-      - "5432:5432"
-    volumes:
-      - "/path/to/containers/cnpg-postgres:/var/lib/postgresql/data"
-    annotation:
-      org.freebsd.jail.allow.sysvipc: "true"
-```
-
-Save as `cnpg-postgres-deploy.yaml`, then run `ansible-playbook cnpg-postgres-deploy.yaml`.
+Save as `bastille-compose.yml`, then run `bastille up`.
 
 ## Parameters
 
